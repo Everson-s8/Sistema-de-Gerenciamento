@@ -1,7 +1,3 @@
-Aqui está um README introdutório seguindo os critérios de avaliação:  
-
----
-
 # 📌 Sistema de Gerenciamento de Projetos  
 
 ## 📖 Visão Geral  
