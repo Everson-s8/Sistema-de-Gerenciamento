@@ -1,7 +1,3 @@
-Segue abaixo um exemplo de README.md melhorado, unificando as informações do backend e frontend, sem as seções de licença, contribuição ou testes:
-
----
-
 ```markdown
 # 📌 Sistema de Gerenciamento de Projetos
 
