@@ -38,6 +38,7 @@ export default function ProjectManagement() {
       }
       const data = await response.json();
       setProjects(data);
+      return data; // Retorna os dados para uso onde necessário
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast({
@@ -46,23 +47,77 @@ export default function ProjectManagement() {
         description:
           "Não foi possível carregar a lista de projetos. Tente novamente.",
       });
+      return []; // Retorna array vazio em caso de erro
     } finally {
       setLoading(false);
     }
   };
 
+  // Função para adicionar novo projeto
   const handleAddProject = (initialStatus: ProjectStatus) => {
-    setSelectedProject({ status: initialStatus } as Project);
+    const newProject: ProjectFormData = {
+      name: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+      teamResponsible: "ADMFIN",
+      status: initialStatus,
+    };
+
+    setSelectedProject(null); // Limpa qualquer seleção anterior
     setProjectFormOpen(true);
   };
 
+  // Função para editar projeto existente
   const handleEditProject = (project: Project) => {
-    setSelectedProject(project); // Puxa os dados do projeto
+    setSelectedProject(project);
     setProjectFormOpen(true);
   };
-  
+
+  // Função para salvar projeto (novo ou edição)
+  const handleSubmitProject = async (formData: ProjectFormData) => {
+    setIsSubmitting(true);
+    try {
+      const isEditing = selectedProject?.id;
+      const url = isEditing
+        ? `http://localhost:8080/api/projects/${selectedProject.id}`
+        : "http://localhost:8080/api/projects";
+      const method = isEditing ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao salvar projeto");
+      }
+
+      toast({
+        title: isEditing ? "Projeto atualizado" : "Projeto criado",
+        description: formData.name,
+      });
+
+      await fetchProjects();
+      setProjectFormOpen(false);
+      setSelectedProject(null);
+    } catch (error) {
+      console.error("Error saving project:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao salvar projeto",
+        description: "Verifique os dados e tente novamente.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleAddTask = (projectId: number) => {
+    // Encontra o projeto e limpa qualquer tarefa selecionada
     const project = projects.find((p) => p.id === projectId);
     setSelectedProject(project || null);
     setSelectedTask(null);
@@ -70,11 +125,12 @@ export default function ProjectManagement() {
   };
 
   const handleEditTask = (task: Task) => {
-    setSelectedTask(task); 
+    // Para edição, mantém a referência ao projeto atual
+    const project = projects.find((p) => p.tasks.some((t) => t.id === task.id));
+    setSelectedProject(project || null);
+    setSelectedTask(task);
     setTaskFormOpen(true);
   };
-  
-  
 
   const handleViewTasks = (project: Project) => {
     setSelectedProject(project);
@@ -116,100 +172,45 @@ export default function ProjectManagement() {
     }
   };
 
-  const handleSubmitProject = async (formData: ProjectFormData) => {
-    setIsSubmitting(true);
-    try {
-      if (!formData.id) {
-        throw new Error("ID do projeto ausente. Algo está errado!");
-      }
-  
-      const url = `http://localhost:8080/api/projects/${formData.id}`;
-      const method = formData.id ? "PUT" : "POST"; // Garante que "PUT" seja usado na edição
-  
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Erro ao salvar projeto");
-      }
-  
-      toast({
-        title: `Projeto ${formData.id ? "atualizado" : "criado"} com sucesso!`,
-        description: formData.name,
-      });
-  
-      await fetchProjects(); // Atualiza os projetos na tela
-      setProjectFormOpen(false);
-      setSelectedProject(null);
-    } catch (error) {
-      console.error("Error saving project:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao salvar projeto",
-        description: "Verifique os dados e tente novamente.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
-
-  useEffect(() => {
-    if (selectedProject) {
-      setSelectedProject(
-        projects.find((p) => p.id === selectedProject.id) || null
-      );
-    }
-  }, [projects]);
-  
-
   const handleSubmitTask = async (formData: TaskFormData) => {
     setIsSubmitting(true);
     try {
       if (!selectedProject?.id) {
         throw new Error("Projeto não selecionado");
       }
-  
+
       const url = formData.id
         ? `http://localhost:8080/api/projects/${selectedProject.id}/tasks/${formData.id}`
         : `http://localhost:8080/api/projects/${selectedProject.id}/tasks`;
-  
+
       const method = formData.id ? "PUT" : "POST";
-  
+
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) {
         throw new Error("Erro ao salvar tarefa");
       }
-  
+
+      const updatedTask = await response.json();
+
+      // Atualiza a lista de projetos
+      const updatedProjects = await fetchProjects();
+
+      // Atualiza o projeto selecionado com os dados mais recentes
+      const updatedProject = updatedProjects.find(
+        (p: Project) => p.id === selectedProject.id
+      );
+      setSelectedProject(updatedProject || null);
+
       toast({
         title: `Tarefa ${formData.id ? "atualizada" : "criada"} com sucesso!`,
         description: formData.title,
       });
-  
-      // ✅ Atualiza a lista de tarefas no estado global sem precisar de F5
-      setProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project.id === selectedProject.id
-            ? {
-                ...project,
-                tasks: project.tasks.map((task) =>
-                  task.id === formData.id ? { ...task, ...formData } : task
-                ),
-              }
-            : project
-        )
-      );
-  
+
       setTaskFormOpen(false);
       setSelectedTask(null);
     } catch (error) {
@@ -224,22 +225,15 @@ export default function ProjectManagement() {
     }
   };
 
-  useEffect(() => {
-    if (selectedProject) {
-      setSelectedProject(
-        projects.find((p) => p.id === selectedProject.id) || null
-      );
-    }
-  }, [projects]);
-  
-  
-  
-  const handleUpdateTaskStatus = async (taskId: number, newStatus: ProjectStatus) => {
+  const handleUpdateTaskStatus = async (
+    taskId: number,
+    newStatus: ProjectStatus
+  ) => {
     try {
       if (!selectedProject?.id) {
         throw new Error("Projeto não selecionado");
       }
-  
+
       const response = await fetch(
         `http://localhost:8080/api/projects/${selectedProject.id}/tasks/${taskId}/status?status=${newStatus}`,
         {
@@ -247,29 +241,24 @@ export default function ProjectManagement() {
           headers: { "Content-Type": "application/json" },
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Erro ao atualizar status");
       }
-  
+
+      // Atualiza a lista de projetos
+      const updatedProjects = await fetchProjects();
+
+      // Atualiza o projeto selecionado com os dados mais recentes
+      const updatedProject = updatedProjects.find(
+        (p: Project) => p.id === selectedProject.id
+      );
+      setSelectedProject(updatedProject || null);
+
       toast({
         title: "Status atualizado",
         description: `Status da tarefa atualizado para ${newStatus}`,
       });
-  
-      // 🔥 Atualiza a tarefa no estado do projeto sem precisar de F5
-      setProjects((prevProjects) =>
-        prevProjects.map((project) =>
-          project.id === selectedProject.id
-            ? {
-                ...project,
-                tasks: project.tasks.map((task) =>
-                  task.id === taskId ? { ...task, status: newStatus } : task
-                ),
-              }
-            : project
-        )
-      );
     } catch (error) {
       console.error("Error updating task status:", error);
       toast({
@@ -279,9 +268,6 @@ export default function ProjectManagement() {
       });
     }
   };
-  
-  
-
 
   if (loading) {
     return (
@@ -292,8 +278,6 @@ export default function ProjectManagement() {
       </Layout>
     );
   }
-
-  
 
   return (
     <Layout>
@@ -306,33 +290,40 @@ export default function ProjectManagement() {
         onUpdateProjectStatus={handleUpdateProjectStatus}
       />
 
-        <ProjectForm
-          isOpen={projectFormOpen}
-          onClose={() => setProjectFormOpen(false)}
-          onSubmit={handleSubmitProject}
-          initialData={selectedProject || undefined}
-          isSubmitting={isSubmitting}
-        />
-
+      <ProjectForm
+        isOpen={projectFormOpen}
+        onClose={() => {
+          setProjectFormOpen(false);
+          setSelectedProject(null);
+        }}
+        onSubmit={handleSubmitProject}
+        initialData={selectedProject}
+        isSubmitting={isSubmitting}
+      />
 
       <TaskForm
         isOpen={taskFormOpen}
-        onClose={() => setTaskFormOpen(false)}
+        onClose={() => {
+          setTaskFormOpen(false);
+          setSelectedTask(null);
+        }}
         onSubmit={handleSubmitTask}
         projectId={selectedProject?.id || 0}
-        initialData={selectedTask || undefined}
+        initialData={selectedTask}
         isSubmitting={isSubmitting}
       />
 
       <TaskList
         isOpen={taskListOpen}
-        onClose={() => setTaskListOpen(false)}
+        onClose={() => {
+          setTaskListOpen(false);
+          setSelectedProject(null);
+        }}
         project={selectedProject}
         onAddTask={handleAddTask}
-        onEditTask={handleEditTask}  // ✅ Adicionado corretamente
-        onUpdateTaskStatus={handleUpdateTaskStatus}  // ✅ Adicionado corretamente
+        onEditTask={handleEditTask}
+        onUpdateTaskStatus={handleUpdateTaskStatus}
       />
-
     </Layout>
   );
 }

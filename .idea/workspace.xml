@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="3c93c327-bc95-42a7-ae39-99c29aa473ce" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Front-End/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Front-End/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Front-End/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/Front-End/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/logback-spring.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/ProjectManagementApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/ProjectManagementApplication.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/config/CorsConfig$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/config/CorsConfig$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/config/CorsConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/controller/ProjectController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/controller/ProjectController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/controller/TaskController.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/controller/TaskController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/ProjectDTO$ProjectDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/ProjectDTO$ProjectDTOBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/ProjectDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/ProjectDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/TaskDTO$TaskDTOBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/TaskDTO$TaskDTOBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/TaskDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/TaskDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/mapper/ProjectMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/mapper/ProjectMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/mapper/TaskMapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/dto/mapper/TaskMapper.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Project$ProjectBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Project$ProjectBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Project.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Project.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Task$TaskBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Task$TaskBuilder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Task.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/Task.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/enums/ProjectStatus.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/enums/ProjectStatus.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/enums/TaskResponsible.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/enums/TaskResponsible.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/enums/TaskStatus.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/entity/enums/TaskStatus.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/ApiExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/ApiExceptionHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/BusinessException.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/BusinessException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/NotFoundException.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/NotFoundException.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/ValidationErrorDetails.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/exception/ValidationErrorDetails.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/repository/ProjectRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/repository/ProjectRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/repository/TaskRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/repository/TaskRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/service/ProjectService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/service/ProjectService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/service/TaskService.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/classes/secretaria/servidor/service/TaskService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/target/test-classes/secretaria/servidor/DesafioApplicationTests.class" beforeDir="false" afterPath="$PROJECT_DIR$/backend/target/test-classes/secretaria/servidor/DesafioApplicationTests.class" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "Everson-s8"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Everson-s8/Sistema-de-Gerenciamento.git",
+    "accountId": "cc134068-ce1a-4420-acaf-8fdb7e983fef"
+  }
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 2
+}]]></component>
+  <component name="ProjectId" id="2sNSVBUCqx4C65oRn8aaBaC3CwQ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/evers/Music/Desafio/teste_final/Sistema-de-Gerenciamento/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9f38398b9061-39b83d9b5494-intellij.indexing.shared.core-IU-241.18034.62" />
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-IU-241.18034.62" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3c93c327-bc95-42a7-ae39-99c29aa473ce" name="Changes" comment="" />
+      <created>1738294560524</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1738294560524</updated>
+      <workItem from="1738294561587" duration="52000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

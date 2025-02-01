@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,41 +30,51 @@ interface ProjectFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ProjectFormData) => void;
-  initialData?: Partial<Project>;
+  initialData?: Project | null;
   isSubmitting?: boolean;
 }
+
+const defaultFormData: ProjectFormData = {
+  name: "",
+  description: "",
+  startDate: "",
+  endDate: "",
+  teamResponsible: "ADMFIN",
+  status: "PLANEJADO",
+};
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  initialData = {},
+  initialData,
   isSubmitting = false,
 }) => {
-  const [formData, setFormData] = React.useState<ProjectFormData>({
-    name: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    teamResponsible: "ADMFIN",
-    status: "PLANEJADO",
-    ...initialData,
-  });
-
+  const [formData, setFormData] =
+    React.useState<ProjectFormData>(defaultFormData);
   const [errors, setErrors] = React.useState<ProjectFormErrors>({});
 
-  useEffect(() => {
-    if (initialData && initialData.id && initialData.id !== formData.id) {
-      setFormData((prev) => ({
-        ...prev,
-        ...initialData,
-        startDate: initialData.startDate ? new Date(initialData.startDate).toISOString().split("T")[0] : "",
-        endDate: initialData.endDate ? new Date(initialData.endDate).toISOString().split("T")[0] : "",
-      }));
+  // Reset form when opening/closing or when initialData changes
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        // Se tiver dados iniciais, é uma edição
+        setFormData({
+          ...initialData,
+          startDate: initialData.startDate
+            ? new Date(initialData.startDate).toISOString().split("T")[0]
+            : "",
+          endDate: initialData.endDate
+            ? new Date(initialData.endDate).toISOString().split("T")[0]
+            : "",
+        });
+      } else {
+        // Se não tiver dados iniciais, é uma criação
+        setFormData(defaultFormData);
+      }
     }
-  }, [initialData, formData.id]);
-  
-  
+  }, [isOpen, initialData]);
+
   const validateForm = (): boolean => {
     const newErrors: ProjectFormErrors = {};
 
@@ -99,9 +109,10 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
   ) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "startDate" || name === "endDate" ? (value || "") : value,
+      [name]: value,
     }));
-  
+
+    // Limpa o erro do campo quando ele é alterado
     if (errors[name as keyof ProjectFormErrors]) {
       setErrors((prev) => {
         const { [name]: _, ...rest } = prev;
@@ -109,14 +120,13 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       });
     }
   };
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {initialData.id ? "Editar Projeto" : "Novo Projeto"}
+            {initialData ? "Editar Projeto" : "Novo Projeto"}
           </DialogTitle>
         </DialogHeader>
 
@@ -142,7 +152,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Descrição</Label>
+              <Label htmlFor="description">Descrição </Label>{" "}
               <Textarea
                 id="description"
                 value={formData.description}
@@ -178,7 +188,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                 <Input
                   id="endDate"
                   type="date"
-                  value={formData.endDate || ""} 
+                  value={formData.endDate || ""}
                   onChange={(e) => handleChange("endDate", e.target.value)}
                   className={errors.endDate ? "border-red-500" : ""}
                 />
@@ -248,13 +258,18 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
                 ? "Salvando..."
-                : initialData.id
+                : initialData
                 ? "Atualizar"
                 : "Criar"}
             </Button>

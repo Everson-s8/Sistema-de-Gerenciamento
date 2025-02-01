@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,39 +32,48 @@ interface TaskFormProps {
   onClose: () => void;
   onSubmit: (data: TaskFormData) => void;
   projectId: number;
-  initialData?: Partial<Task> | null;
+  initialData?: Task | null;
   isSubmitting?: boolean;
 }
+
+// Dados padrão para nova tarefa
+const defaultFormData: TaskFormData = {
+  title: "",
+  description: "",
+  responsible: "PLO",
+  dueDays: 1,
+  status: "PLANEJADO",
+};
 
 const TaskForm: React.FC<TaskFormProps> = ({
   isOpen,
   onClose,
   onSubmit,
   projectId,
-  initialData = {},
+  initialData,
   isSubmitting = false,
 }) => {
-  const [formData, setFormData] = React.useState<TaskFormData>({
-    title: "",
-    description: "",
-    responsible: "PLO",
-    dueDays: 1,
-    status: "PLANEJADO",
-    projectId: projectId,
-    ...initialData,
-  });
-
-  useEffect(() => {
-    if (initialData && initialData.id && initialData.id !== formData.id) {
-      setFormData((prev) => ({
-        ...prev,
-        ...initialData,
-      }));
-    }
-  }, [initialData, formData.id]);
-  
-  
+  const [formData, setFormData] = React.useState<TaskFormData>(defaultFormData);
   const [errors, setErrors] = React.useState<TaskFormErrors>({});
+
+  // Reset form when opening/closing or when initialData changes
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        // Se tiver dados iniciais, é uma edição
+        setFormData({
+          ...initialData,
+          projectId,
+        });
+      } else {
+        // Se não tiver dados iniciais, é uma criação
+        setFormData({
+          ...defaultFormData,
+          projectId,
+        });
+      }
+    }
+  }, [isOpen, initialData, projectId]);
 
   const validateForm = (): boolean => {
     const newErrors: TaskFormErrors = {};
@@ -86,16 +95,12 @@ const TaskForm: React.FC<TaskFormProps> = ({
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateForm()) {
-      const submitData = {
+      onSubmit({
         ...formData,
         projectId,
-        id: initialData?.id || undefined, // Inclui o ID se for edição
-      } satisfies TaskFormData;
-  
-      onSubmit(submitData);
+      });
     }
   };
-  
 
   const handleChange = <K extends keyof TaskFormData>(
     name: K,
@@ -106,6 +111,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       [name]: value,
     }));
 
+    // Limpa o erro do campo quando ele é alterado
     if (errors[name as keyof TaskFormErrors]) {
       setErrors((prev) => {
         const { [name]: _, ...rest } = prev;
@@ -119,7 +125,7 @@ const TaskForm: React.FC<TaskFormProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <span>{initialData?.id ? "Editar Tarefa" : "Nova Tarefa"}</span>
+            <span>{initialData ? "Editar Tarefa" : "Nova Tarefa"}</span>
             {formData.status && <StatusBadge status={formData.status} />}
           </DialogTitle>
         </DialogHeader>
@@ -240,13 +246,18 @@ const TaskForm: React.FC<TaskFormProps> = ({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
                 ? "Salvando..."
-                : initialData?.id
+                : initialData
                 ? "Atualizar"
                 : "Criar"}
             </Button>
