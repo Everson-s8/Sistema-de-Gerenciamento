@@ -23,6 +23,7 @@ import { ProjectFormData, Project } from "@/types";
 interface ProjectFormErrors {
   name?: string;
   teamResponsible?: string;
+  startDate?: string;
   endDate?: string;
 }
 
@@ -83,6 +84,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
     }
     if (!formData.teamResponsible) {
       newErrors.teamResponsible = "Equipe responsável é obrigatória";
+    }
+    if (!formData.startDate) {
+      newErrors.startDate = "Data de início é obrigatória";
     }
     if (
       formData.endDate &&
@@ -175,6 +179,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
                   type="date"
                   value={formData.startDate || ""}
                   onChange={(e) => handleChange("startDate", e.target.value)}
+                  className={errors.startDate ? "border-red-500" : ""}
                 />
               </div>
 

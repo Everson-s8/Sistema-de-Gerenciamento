@@ -92,7 +92,10 @@ const ProjectDetailsModal: React.FC<ProjectDetailsModalProps> = ({
               <div className="flex items-center text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4 mr-2" />
                 <span>
-                  Término: {new Date(project.endDate).toLocaleDateString()}
+                  Término:{" "}
+                  {project.endDate
+                    ? new Date(project.endDate).toLocaleDateString()
+                    : "Não definido"}
                 </span>
               </div>
               <div className="flex items-center text-sm text-muted-foreground">

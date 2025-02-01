@@ -17,6 +17,7 @@ import {
 
 export default function ProjectManagement() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [projectFormOpen, setProjectFormOpen] = useState(false);
   const [taskFormOpen, setTaskFormOpen] = useState(false);
@@ -269,6 +270,43 @@ export default function ProjectManagement() {
     }
   };
 
+  const searchProjects = async (name: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/projects/search?name=${encodeURIComponent(name)}`
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar projetos");
+      }
+      const data = await response.json();
+      setProjects(data);
+    } catch (error) {
+      console.error("Error searching projects:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro na busca",
+        description: "Não foi possível buscar os projetos. Tente novamente.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm.trim() !== "") {
+        searchProjects(searchTerm);
+      } else {
+        // Se o campo estiver vazio, recarrega todos os projetos
+        fetchProjects();
+      }
+    }, 500); // 500ms de atraso
+  
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  
   if (loading) {
     return (
       <Layout>
@@ -280,7 +318,7 @@ export default function ProjectManagement() {
   }
 
   return (
-    <Layout>
+    <Layout onSearchChange={(value: string) => setSearchTerm(value)}>
       <KanbanBoard
         projects={projects}
         onAddProject={handleAddProject}
