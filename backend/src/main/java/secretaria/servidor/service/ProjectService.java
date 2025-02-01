@@ -66,6 +66,7 @@ public class ProjectService {
         existing.setStartDate(newData.getStartDate());
         existing.setEndDate(newData.getEndDate());
         existing.setStatus(newData.getStatus());
+        existing.setTeamResponsible(newData.getTeamResponsible());
 
         log.info("Atualizando projeto ID: {}", projectId);
         return projectRepository.save(existing);
