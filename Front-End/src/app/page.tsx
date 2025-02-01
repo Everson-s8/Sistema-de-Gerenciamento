@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import KanbanBoard from "@/components/kanban/board/board";
 import ProjectForm from "@/components/kanban/forms/project-form";
+import Filters from "@/components/Filters/Filters";
 import TaskForm from "@/components/kanban/forms/task-form";
 import TaskList from "@/components/kanban/task-list";
 import Layout from "@/components/layout/layout";
 import { useToast } from "@/hooks/use-toast";
+
 import {
   Project,
   Task,
@@ -25,6 +27,11 @@ export default function ProjectManagement() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState("");
+  const [selectedResponsibleFilter, setSelectedResponsibleFilter] = useState("");
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState("");
+  
   const { toast } = useToast();
 
   useEffect(() => {
@@ -39,6 +46,7 @@ export default function ProjectManagement() {
       }
       const data = await response.json();
       setProjects(data);
+      setAllProjects(data);
       return data; // Retorna os dados para uso onde necessário
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -65,7 +73,7 @@ export default function ProjectManagement() {
       status: initialStatus,
     };
 
-    setSelectedProject(null); // Limpa qualquer seleção anterior
+    setSelectedProject(null); 
     setProjectFormOpen(true);
   };
 
@@ -118,7 +126,6 @@ export default function ProjectManagement() {
   };
 
   const handleAddTask = (projectId: number) => {
-    // Encontra o projeto e limpa qualquer tarefa selecionada
     const project = projects.find((p) => p.id === projectId);
     setSelectedProject(project || null);
     setSelectedTask(null);
@@ -126,7 +133,6 @@ export default function ProjectManagement() {
   };
 
   const handleEditTask = (task: Task) => {
-    // Para edição, mantém a referência ao projeto atual
     const project = projects.find((p) => p.tasks.some((t) => t.id === task.id));
     setSelectedProject(project || null);
     setSelectedTask(task);
@@ -198,10 +204,8 @@ export default function ProjectManagement() {
 
       const updatedTask = await response.json();
 
-      // Atualiza a lista de projetos
       const updatedProjects = await fetchProjects();
 
-      // Atualiza o projeto selecionado com os dados mais recentes
       const updatedProject = updatedProjects.find(
         (p: Project) => p.id === selectedProject.id
       );
@@ -247,10 +251,8 @@ export default function ProjectManagement() {
         throw new Error("Erro ao atualizar status");
       }
 
-      // Atualiza a lista de projetos
       const updatedProjects = await fetchProjects();
 
-      // Atualiza o projeto selecionado com os dados mais recentes
       const updatedProject = updatedProjects.find(
         (p: Project) => p.id === selectedProject.id
       );
@@ -298,13 +300,42 @@ export default function ProjectManagement() {
       if (searchTerm.trim() !== "") {
         searchProjects(searchTerm);
       } else {
-        // Se o campo estiver vazio, recarrega todos os projetos
         fetchProjects();
       }
-    }, 500); // 500ms de atraso
+    }, 500); 
   
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
+
+  useEffect(() => {
+    let filtered = allProjects;
+
+    if (searchTerm.trim() !== "") {
+      filtered = filtered.filter(project =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+  
+    // Filtro por status
+    if (selectedStatusFilter) {
+      filtered = filtered.filter(project => project.status === selectedStatusFilter);
+    }
+  
+    // Filtro por equipe responsável
+    if (selectedTeamFilter) {
+      filtered = filtered.filter(project => project.teamResponsible === selectedTeamFilter);
+    }
+  
+    // Filtro por responsável das tarefas
+    if (selectedResponsibleFilter) {
+      filtered = filtered.filter(project =>
+        project.tasks && project.tasks.some(task => task.responsible === selectedResponsibleFilter)
+      );
+    }
+  
+    setProjects(filtered);
+  }, [searchTerm, selectedStatusFilter, selectedTeamFilter, selectedResponsibleFilter, allProjects]);
+
 
   
   if (loading) {
@@ -319,6 +350,14 @@ export default function ProjectManagement() {
 
   return (
     <Layout onSearchChange={(value: string) => setSearchTerm(value)}>
+    <Filters
+      selectedStatus={selectedStatusFilter}
+      onStatusChange={setSelectedStatusFilter}
+      selectedTeam={selectedTeamFilter}
+      onTeamChange={setSelectedTeamFilter}
+      selectedResponsible={selectedResponsibleFilter}
+      onResponsibleChange={setSelectedResponsibleFilter}
+    />
       <KanbanBoard
         projects={projects}
         onAddProject={handleAddProject}
