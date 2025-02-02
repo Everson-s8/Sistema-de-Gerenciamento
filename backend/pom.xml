@@ -4,8 +4,6 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-
-	<!-- IDENTIFICAÇÃO DO PROJETO -->
 	<groupId>secretaria.servidor</groupId>
 	<artifactId>project-management</artifactId>
 	<version>1.0.0</version>
@@ -16,13 +14,10 @@
 	<properties>
 		<!-- Java 17 (LTS) -->
 		<java.version>17</java.version>
-		<!-- Versão do Spring Boot -->
 		<spring-boot.version>3.3.2</spring-boot.version>
-		<!-- Define a codificação dos arquivos -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<!-- PARENT DO SPRING BOOT -->
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -30,48 +25,40 @@
 		<relativePath/>
 	</parent>
 
-	<!-- DEPENDÊNCIAS PRINCIPAIS -->
 	<dependencies>
-		<!-- SPRING WEB (API REST, Tomcat) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- SPRING DATA JPA (ORM com Hibernate) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-		<!-- DRIVER POSTGRESQL -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- BEAN VALIDATION (para @Valid, etc.) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- LOMBOK (opcional) -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- SWAGGER/OPENAPI (para documentação da API) -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 			<version>2.1.0</version>
 		</dependency>
 
-		<!-- DEVTOOLS (auto-restart durante desenvolvimento) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -79,41 +66,36 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- LOGGING (já vem no starter parent, mas se quiser explicitar) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
 
-		<!-- (OPCIONAL) ROME (para RSS) -->
 		<dependency>
 			<groupId>com.rometools</groupId>
 			<artifactId>rome</artifactId>
 			<version>1.15.0</version>
 		</dependency>
 
-		<!-- (OPCIONAL) BANCO H2 EM MEMÓRIA (para testes) -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- (OPCIONAL) JAXB (caso o JDK não inclua) -->
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>2.3.1</version>
 		</dependency>
 
-		<!-- (OPCIONAL) JJWT (para tokens JWT, se necessário) -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
 			<version>0.9.1</version>
 		</dependency>
 
-		<!-- TESTES -->
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
