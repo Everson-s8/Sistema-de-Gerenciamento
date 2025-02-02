@@ -85,7 +85,6 @@ spring.jpa.hibernate.ddl-auto=update
   mvn spring-boot:run
   ```
 
-- A API estará disponível em: [http://localhost:8080](http://localhost:8080)
 
 #### 4. Documentação da API:
 
@@ -188,3 +187,12 @@ npm run dev
 - `PUT /api/projects/{projectId}/tasks/{taskId}` – Atualiza uma tarefa.
 - `PATCH /api/projects/{projectId}/tasks/{taskId}/status?status={status}` – Atualiza o status de uma tarefa.
 - `DELETE /api/projects/{projectId}/tasks/{taskId}` – Exclui uma tarefa.
+
+
+### Materiais Complementares
+
+Abaixo estão os links para os materiais de complementação do arquivo README.md:
+
+🔹 Back-end: [Clique aqui](https://docs.google.com/document/d/1ExRXtGv2hyO90hvASCafFo6Q1D4ZjG3sQ-ueJEeTwB0/edit?usp=sharing)
+
+🔹 Front-end: [Clique aqui](https://docs.google.com/document/d/1IbajeqJM-ip4XLqCQp8boXlxDjYMQI-QCEiFROqftSM/edit?usp=sharing)
