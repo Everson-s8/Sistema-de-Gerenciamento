@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from "react";
 import KanbanBoard from "@/components/kanban/board/board";
 import ProjectForm from "@/components/kanban/forms/project-form";
+import Filters from "@/components/Filters/Filters";
 import TaskForm from "@/components/kanban/forms/task-form";
 import TaskList from "@/components/kanban/task-list";
 import Layout from "@/components/layout/layout";
 import { useToast } from "@/hooks/use-toast";
+
 import {
   Project,
   Task,
@@ -17,6 +19,7 @@ import {
 
 export default function ProjectManagement() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [projectFormOpen, setProjectFormOpen] = useState(false);
   const [taskFormOpen, setTaskFormOpen] = useState(false);
@@ -24,6 +27,12 @@ export default function ProjectManagement() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [selectedStatusFilter, setSelectedStatusFilter] = useState("");
+  const [selectedResponsibleFilter, setSelectedResponsibleFilter] =
+    useState("");
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState("");
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,7 +47,8 @@ export default function ProjectManagement() {
       }
       const data = await response.json();
       setProjects(data);
-      return data; // Retorna os dados para uso onde necessário
+      setAllProjects(data);
+      return data;
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast({
@@ -47,13 +57,12 @@ export default function ProjectManagement() {
         description:
           "Não foi possível carregar a lista de projetos. Tente novamente.",
       });
-      return []; // Retorna array vazio em caso de erro
+      return [];
     } finally {
       setLoading(false);
     }
   };
 
-  // Função para adicionar novo projeto
   const handleAddProject = (initialStatus: ProjectStatus) => {
     const newProject: ProjectFormData = {
       name: "",
@@ -64,17 +73,48 @@ export default function ProjectManagement() {
       status: initialStatus,
     };
 
-    setSelectedProject(null); // Limpa qualquer seleção anterior
+    setSelectedProject(null);
     setProjectFormOpen(true);
   };
 
-  // Função para editar projeto existente
   const handleEditProject = (project: Project) => {
     setSelectedProject(project);
     setProjectFormOpen(true);
   };
 
-  // Função para salvar projeto (novo ou edição)
+  const handleDeleteProject = async (projectId: number): Promise<void> => {
+    if (!confirm("Tem certeza que deseja excluir este projeto?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/projects/${projectId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir projeto");
+      }
+
+      toast({
+        title: "Projeto excluído",
+        description: "O projeto foi excluído com sucesso.",
+      });
+
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir projeto",
+        description: "Não foi possível excluir o projeto. Tente novamente.",
+      });
+    }
+  };
+
   const handleSubmitProject = async (formData: ProjectFormData) => {
     setIsSubmitting(true);
     try {
@@ -117,7 +157,6 @@ export default function ProjectManagement() {
   };
 
   const handleAddTask = (projectId: number) => {
-    // Encontra o projeto e limpa qualquer tarefa selecionada
     const project = projects.find((p) => p.id === projectId);
     setSelectedProject(project || null);
     setSelectedTask(null);
@@ -125,7 +164,6 @@ export default function ProjectManagement() {
   };
 
   const handleEditTask = (task: Task) => {
-    // Para edição, mantém a referência ao projeto atual
     const project = projects.find((p) => p.tasks.some((t) => t.id === task.id));
     setSelectedProject(project || null);
     setSelectedTask(task);
@@ -197,10 +235,8 @@ export default function ProjectManagement() {
 
       const updatedTask = await response.json();
 
-      // Atualiza a lista de projetos
       const updatedProjects = await fetchProjects();
 
-      // Atualiza o projeto selecionado com os dados mais recentes
       const updatedProject = updatedProjects.find(
         (p: Project) => p.id === selectedProject.id
       );
@@ -227,15 +263,12 @@ export default function ProjectManagement() {
 
   const handleUpdateTaskStatus = async (
     taskId: number,
-    newStatus: ProjectStatus
+    newStatus: ProjectStatus,
+    projectId: number
   ) => {
     try {
-      if (!selectedProject?.id) {
-        throw new Error("Projeto não selecionado");
-      }
-
       const response = await fetch(
-        `http://localhost:8080/api/projects/${selectedProject.id}/tasks/${taskId}/status?status=${newStatus}`,
+        `http://localhost:8080/api/projects/${projectId}/tasks/${taskId}/status?status=${newStatus}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -246,14 +279,8 @@ export default function ProjectManagement() {
         throw new Error("Erro ao atualizar status");
       }
 
-      // Atualiza a lista de projetos
       const updatedProjects = await fetchProjects();
-
-      // Atualiza o projeto selecionado com os dados mais recentes
-      const updatedProject = updatedProjects.find(
-        (p: Project) => p.id === selectedProject.id
-      );
-      setSelectedProject(updatedProject || null);
+      setProjects(updatedProjects);
 
       toast({
         title: "Status atualizado",
@@ -269,6 +296,125 @@ export default function ProjectManagement() {
     }
   };
 
+const handleDeleteTask = async (projectId: number, taskId: number): Promise<void> => {
+  const confirmDelete = confirm("Tem certeza que deseja excluir esta tarefa?");
+  if (!confirmDelete) return;
+
+  try {
+    // Atualização otimista: atualiza o estado local antes de chamar o backend
+    setProjects(prev =>
+      prev.map(project => {
+        if (project.id === projectId) {
+          return { ...project, tasks: project.tasks.filter(task => task.id !== taskId) };
+        }
+        return project;
+      })
+    );
+    
+    const response = await fetch(
+      `http://localhost:8080/api/projects/${projectId}/tasks/${taskId}`,
+      { method: "DELETE" }
+    );
+    if (!response.ok) {
+      throw new Error("Erro ao excluir tarefa");
+    }
+    toast({
+      title: "Tarefa excluída",
+      description: "A tarefa foi removida com sucesso.",
+    });
+    // Opcional: refazer o fetch para garantir a consistência com o backend
+    await fetchProjects();
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    toast({
+      variant: "destructive",
+      title: "Erro ao excluir tarefa",
+      description: "Não foi possível excluir a tarefa. Tente novamente.",
+    });
+  }
+};
+
+  
+  
+  
+
+  const searchProjects = async (name: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/projects/search?name=${encodeURIComponent(
+          name
+        )}`
+      );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar projetos");
+      }
+      const data = await response.json();
+      setProjects(data);
+    } catch (error) {
+      console.error("Error searching projects:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro na busca",
+        description: "Não foi possível buscar os projetos. Tente novamente.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm.trim() !== "") {
+        searchProjects(searchTerm);
+      } else {
+        fetchProjects();
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    let filtered = allProjects;
+
+    if (searchTerm.trim() !== "") {
+      filtered = filtered.filter((project) =>
+        project.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (selectedStatusFilter) {
+      filtered = filtered.filter(
+        (project) => project.status === selectedStatusFilter
+      );
+    }
+
+    if (selectedTeamFilter) {
+      filtered = filtered.filter(
+        (project) => project.teamResponsible === selectedTeamFilter
+      );
+    }
+
+    if (selectedResponsibleFilter) {
+      filtered = filtered.filter(
+        (project) =>
+          project.tasks &&
+          project.tasks.some(
+            (task) => task.responsible === selectedResponsibleFilter
+          )
+      );
+    }
+
+    setProjects(filtered);
+  }, [
+    searchTerm,
+    selectedStatusFilter,
+    selectedTeamFilter,
+    selectedResponsibleFilter,
+    allProjects,
+  ]);
+
   if (loading) {
     return (
       <Layout>
@@ -280,14 +426,26 @@ export default function ProjectManagement() {
   }
 
   return (
-    <Layout>
+    <Layout onSearchChange={(value: string) => setSearchTerm(value)}>
+      <Filters
+        selectedStatus={selectedStatusFilter}
+        onStatusChange={setSelectedStatusFilter}
+        selectedTeam={selectedTeamFilter}
+        onTeamChange={setSelectedTeamFilter}
+        selectedResponsible={selectedResponsibleFilter}
+        onResponsibleChange={setSelectedResponsibleFilter}
+      />
       <KanbanBoard
         projects={projects}
         onAddProject={handleAddProject}
         onEditProject={handleEditProject}
         onAddTask={handleAddTask}
         onViewTasks={handleViewTasks}
+        onEditTask={handleEditTask}
         onUpdateProjectStatus={handleUpdateProjectStatus}
+        onUpdateTaskStatus={handleUpdateTaskStatus}
+        onDeleteProject={handleDeleteProject}
+        onDeleteTask={handleDeleteTask}
       />
 
       <ProjectForm
@@ -323,6 +481,7 @@ export default function ProjectManagement() {
         onAddTask={handleAddTask}
         onEditTask={handleEditTask}
         onUpdateTaskStatus={handleUpdateTaskStatus}
+        onDeleteTask={handleDeleteTask}
       />
     </Layout>
   );
