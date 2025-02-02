@@ -17,20 +17,31 @@ import {
   MoreVertical,
   PlusCircle,
   ClipboardList,
+  Trash2,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Project } from "@/types";
+import { Project, Task, TaskStatus } from "@/types";
+
 
 interface ProjectCardProps {
   project: Project;
   onEditProject: (project: Project) => void;
   onAddTask: (projectId: number) => void;
   onViewTasks: (project: Project) => void;
+  onEditTask: (task: Task) => void;
+  onUpdateTaskStatus: (
+    taskId: number,
+    status: TaskStatus,
+    projectId: number
+  ) => Promise<void>;
+  onDeleteProject: (projectId: number) => Promise<void>;
+  onDeleteTask: (projectId: number, taskId: number) => Promise<void>;
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({
@@ -38,6 +49,10 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onEditProject,
   onAddTask,
   onViewTasks,
+  onEditTask,
+  onUpdateTaskStatus,
+  onDeleteProject,
+  onDeleteTask,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = React.useState(false);
 
@@ -94,6 +109,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onViewTasks(project)}>
                     Ver Tarefas
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600 focus:bg-red-100"
+                    onClick={() => onDeleteProject(project.id)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Excluir Projeto
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -157,10 +180,11 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
         project={project}
         onEditProject={onEditProject}
         onAddTask={onAddTask}
-        onViewTasks={onViewTasks} // Mudamos para onViewTasks ao invés de onEditTask
-        onUpdateTaskStatus={async (taskId, status) =>
-          console.log("Implement task status update")
-        }
+        onEditTask={onEditTask}
+        onViewTasks={onViewTasks}
+        onUpdateTaskStatus={onUpdateTaskStatus}
+        onDeleteProject={onDeleteProject}
+        onDeleteTask={onDeleteTask} 
       />
     </>
   );

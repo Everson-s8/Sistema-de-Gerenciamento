@@ -29,9 +29,10 @@ export default function ProjectManagement() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState("");
-  const [selectedResponsibleFilter, setSelectedResponsibleFilter] = useState("");
+  const [selectedResponsibleFilter, setSelectedResponsibleFilter] =
+    useState("");
   const [selectedTeamFilter, setSelectedTeamFilter] = useState("");
-  
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function ProjectManagement() {
       const data = await response.json();
       setProjects(data);
       setAllProjects(data);
-      return data; // Retorna os dados para uso onde necessário
+      return data;
     } catch (error) {
       console.error("Error fetching projects:", error);
       toast({
@@ -56,13 +57,12 @@ export default function ProjectManagement() {
         description:
           "Não foi possível carregar a lista de projetos. Tente novamente.",
       });
-      return []; // Retorna array vazio em caso de erro
+      return [];
     } finally {
       setLoading(false);
     }
   };
 
-  // Função para adicionar novo projeto
   const handleAddProject = (initialStatus: ProjectStatus) => {
     const newProject: ProjectFormData = {
       name: "",
@@ -73,17 +73,48 @@ export default function ProjectManagement() {
       status: initialStatus,
     };
 
-    setSelectedProject(null); 
+    setSelectedProject(null);
     setProjectFormOpen(true);
   };
 
-  // Função para editar projeto existente
   const handleEditProject = (project: Project) => {
     setSelectedProject(project);
     setProjectFormOpen(true);
   };
 
-  // Função para salvar projeto (novo ou edição)
+  const handleDeleteProject = async (projectId: number): Promise<void> => {
+    if (!confirm("Tem certeza que deseja excluir este projeto?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/projects/${projectId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erro ao excluir projeto");
+      }
+
+      toast({
+        title: "Projeto excluído",
+        description: "O projeto foi excluído com sucesso.",
+      });
+
+      await fetchProjects();
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir projeto",
+        description: "Não foi possível excluir o projeto. Tente novamente.",
+      });
+    }
+  };
+
   const handleSubmitProject = async (formData: ProjectFormData) => {
     setIsSubmitting(true);
     try {
@@ -232,15 +263,12 @@ export default function ProjectManagement() {
 
   const handleUpdateTaskStatus = async (
     taskId: number,
-    newStatus: ProjectStatus
+    newStatus: ProjectStatus,
+    projectId: number
   ) => {
     try {
-      if (!selectedProject?.id) {
-        throw new Error("Projeto não selecionado");
-      }
-
       const response = await fetch(
-        `http://localhost:8080/api/projects/${selectedProject.id}/tasks/${taskId}/status?status=${newStatus}`,
+        `http://localhost:8080/api/projects/${projectId}/tasks/${taskId}/status?status=${newStatus}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -252,11 +280,7 @@ export default function ProjectManagement() {
       }
 
       const updatedProjects = await fetchProjects();
-
-      const updatedProject = updatedProjects.find(
-        (p: Project) => p.id === selectedProject.id
-      );
-      setSelectedProject(updatedProject || null);
+      setProjects(updatedProjects);
 
       toast({
         title: "Status atualizado",
@@ -272,11 +296,55 @@ export default function ProjectManagement() {
     }
   };
 
+const handleDeleteTask = async (projectId: number, taskId: number): Promise<void> => {
+  const confirmDelete = confirm("Tem certeza que deseja excluir esta tarefa?");
+  if (!confirmDelete) return;
+
+  try {
+    // Atualização otimista: atualiza o estado local antes de chamar o backend
+    setProjects(prev =>
+      prev.map(project => {
+        if (project.id === projectId) {
+          return { ...project, tasks: project.tasks.filter(task => task.id !== taskId) };
+        }
+        return project;
+      })
+    );
+    
+    const response = await fetch(
+      `http://localhost:8080/api/projects/${projectId}/tasks/${taskId}`,
+      { method: "DELETE" }
+    );
+    if (!response.ok) {
+      throw new Error("Erro ao excluir tarefa");
+    }
+    toast({
+      title: "Tarefa excluída",
+      description: "A tarefa foi removida com sucesso.",
+    });
+    // Opcional: refazer o fetch para garantir a consistência com o backend
+    await fetchProjects();
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    toast({
+      variant: "destructive",
+      title: "Erro ao excluir tarefa",
+      description: "Não foi possível excluir a tarefa. Tente novamente.",
+    });
+  }
+};
+
+  
+  
+  
+
   const searchProjects = async (name: string) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8080/api/projects/search?name=${encodeURIComponent(name)}`
+        `http://localhost:8080/api/projects/search?name=${encodeURIComponent(
+          name
+        )}`
       );
       if (!response.ok) {
         throw new Error("Erro ao buscar projetos");
@@ -302,8 +370,8 @@ export default function ProjectManagement() {
       } else {
         fetchProjects();
       }
-    }, 500); 
-  
+    }, 500);
+
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
@@ -311,33 +379,42 @@ export default function ProjectManagement() {
     let filtered = allProjects;
 
     if (searchTerm.trim() !== "") {
-      filtered = filtered.filter(project =>
+      filtered = filtered.filter((project) =>
         project.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-  
-    // Filtro por status
+
     if (selectedStatusFilter) {
-      filtered = filtered.filter(project => project.status === selectedStatusFilter);
-    }
-  
-    // Filtro por equipe responsável
-    if (selectedTeamFilter) {
-      filtered = filtered.filter(project => project.teamResponsible === selectedTeamFilter);
-    }
-  
-    // Filtro por responsável das tarefas
-    if (selectedResponsibleFilter) {
-      filtered = filtered.filter(project =>
-        project.tasks && project.tasks.some(task => task.responsible === selectedResponsibleFilter)
+      filtered = filtered.filter(
+        (project) => project.status === selectedStatusFilter
       );
     }
-  
+
+    if (selectedTeamFilter) {
+      filtered = filtered.filter(
+        (project) => project.teamResponsible === selectedTeamFilter
+      );
+    }
+
+    if (selectedResponsibleFilter) {
+      filtered = filtered.filter(
+        (project) =>
+          project.tasks &&
+          project.tasks.some(
+            (task) => task.responsible === selectedResponsibleFilter
+          )
+      );
+    }
+
     setProjects(filtered);
-  }, [searchTerm, selectedStatusFilter, selectedTeamFilter, selectedResponsibleFilter, allProjects]);
+  }, [
+    searchTerm,
+    selectedStatusFilter,
+    selectedTeamFilter,
+    selectedResponsibleFilter,
+    allProjects,
+  ]);
 
-
-  
   if (loading) {
     return (
       <Layout>
@@ -350,21 +427,25 @@ export default function ProjectManagement() {
 
   return (
     <Layout onSearchChange={(value: string) => setSearchTerm(value)}>
-    <Filters
-      selectedStatus={selectedStatusFilter}
-      onStatusChange={setSelectedStatusFilter}
-      selectedTeam={selectedTeamFilter}
-      onTeamChange={setSelectedTeamFilter}
-      selectedResponsible={selectedResponsibleFilter}
-      onResponsibleChange={setSelectedResponsibleFilter}
-    />
+      <Filters
+        selectedStatus={selectedStatusFilter}
+        onStatusChange={setSelectedStatusFilter}
+        selectedTeam={selectedTeamFilter}
+        onTeamChange={setSelectedTeamFilter}
+        selectedResponsible={selectedResponsibleFilter}
+        onResponsibleChange={setSelectedResponsibleFilter}
+      />
       <KanbanBoard
         projects={projects}
         onAddProject={handleAddProject}
         onEditProject={handleEditProject}
         onAddTask={handleAddTask}
         onViewTasks={handleViewTasks}
+        onEditTask={handleEditTask}
         onUpdateProjectStatus={handleUpdateProjectStatus}
+        onUpdateTaskStatus={handleUpdateTaskStatus}
+        onDeleteProject={handleDeleteProject}
+        onDeleteTask={handleDeleteTask}
       />
 
       <ProjectForm
@@ -400,6 +481,7 @@ export default function ProjectManagement() {
         onAddTask={handleAddTask}
         onEditTask={handleEditTask}
         onUpdateTaskStatus={handleUpdateTaskStatus}
+        onDeleteTask={handleDeleteTask}
       />
     </Layout>
   );

@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
 import ProjectCard from "./card";
-import { Project, ProjectStatus } from "@/types";
+import { Project, ProjectStatus, Task, TaskStatus } from "@/types";
 import { useDroppable } from "@dnd-kit/core";
 
 interface KanbanColumnProps {
@@ -21,6 +21,14 @@ interface KanbanColumnProps {
   onEditProject: (project: Project) => void;
   onAddTask: (projectId: number) => void;
   onViewTasks: (project: Project) => void;
+  onEditTask: (task: Task) => void;
+  onUpdateTaskStatus: (
+    taskId: number,
+    status: TaskStatus,
+    projectId: number
+  ) => Promise<void>;
+  onDeleteProject: (projectId: number) => Promise<void>;
+  onDeleteTask: (projectId: number, taskId: number) => Promise<void>;
 }
 
 interface KanbanBoardProps {
@@ -29,7 +37,18 @@ interface KanbanBoardProps {
   onEditProject: (project: Project) => void;
   onAddTask: (projectId: number) => void;
   onViewTasks: (project: Project) => void;
-  onUpdateProjectStatus: (projectId: number, newStatus: ProjectStatus) => void;
+  onEditTask: (task: Task) => void;
+  onUpdateProjectStatus: (
+    projectId: number,
+    newStatus: ProjectStatus
+  ) => Promise<void>;
+  onUpdateTaskStatus: (
+    taskId: number,
+    status: TaskStatus,
+    projectId: number
+  ) => Promise<void>;
+  onDeleteProject: (projectId: number) => Promise<void>;
+  onDeleteTask: (projectId: number, taskId: number) => Promise<void>;
 }
 
 const DroppableColumn: React.FC<KanbanColumnProps> = ({
@@ -40,16 +59,15 @@ const DroppableColumn: React.FC<KanbanColumnProps> = ({
   onEditProject,
   onAddTask,
   onViewTasks,
+  onEditTask,
+  onUpdateTaskStatus,
+  onDeleteProject,
+  onDeleteTask,  
 }) => {
-  const { setNodeRef } = useDroppable({
-    id: status,
-  });
-
+  const { setNodeRef } = useDroppable({ id: status });
+  
   return (
-    <div
-      ref={setNodeRef}
-      className="flex flex-col min-h-[500px] w-full min-w-[300px] max-w-[350px] rounded-lg border-2"
-    >
+    <div ref={setNodeRef} className="flex flex-col min-h-[500px] w-full min-w-[300px] max-w-[350px] rounded-lg border-2">
       <div className="p-3 border-b-2 border-muted flex justify-between items-center">
         <h3 className="font-semibold">{title}</h3>
         <span className="bg-background text-muted-foreground rounded-full px-2 py-1 text-sm">
@@ -66,6 +84,10 @@ const DroppableColumn: React.FC<KanbanColumnProps> = ({
               onEditProject={onEditProject}
               onAddTask={onAddTask}
               onViewTasks={onViewTasks}
+              onEditTask={onEditTask}
+              onUpdateTaskStatus={onUpdateTaskStatus}
+              onDeleteProject={onDeleteProject}
+              onDeleteTask={onDeleteTask} 
             />
           ))}
         </div>
@@ -85,13 +107,18 @@ const DroppableColumn: React.FC<KanbanColumnProps> = ({
   );
 };
 
+
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
   projects,
   onAddProject,
-  onUpdateProjectStatus,
   onEditProject,
   onAddTask,
   onViewTasks,
+  onEditTask,
+  onUpdateProjectStatus,
+  onUpdateTaskStatus,
+  onDeleteProject,
+  onDeleteTask,
 }) => {
   const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
@@ -145,6 +172,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               onEditProject={onEditProject}
               onAddTask={onAddTask}
               onViewTasks={onViewTasks}
+              onEditTask={onEditTask}
+              onUpdateTaskStatus={onUpdateTaskStatus}
+              onDeleteProject={onDeleteProject}
+              onDeleteTask={onDeleteTask}
             />
           ))}
         </div>
