@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import Link from "next/link";
 import { Menu, Search, Bell, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,9 +35,9 @@ const Layout: React.FC<LayoutProps> = ({ children, onSearchChange }) => {
             <Button variant="ghost" size="icon" className="mr-2 md:hidden">
               <Menu className="h-5 w-5" />
             </Button>
-            <a className="flex items-center space-x-2" href="/">
+            <Link className="flex items-center space-x-2" href="/">
               <span className="font-bold">Gestão de Projetos</span>
-            </a>
+            </Link>
           </div>
           <div className="flex-1 flex justify-center">
             <div className="relative w-full max-w-lg">
