@@ -15,3 +15,5 @@ node_modules
 
 # Ignorar arquivo package-lock.json
 package-lock.json
+target/
+*.class
